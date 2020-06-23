@@ -1,0 +1,58 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: hello-world 
+spec:
+  selector:
+    matchLabels:
+      app: hello-world 
+  replicas: 7 
+  template:
+    metadata:
+      labels:
+        app: hello-world 
+    spec:
+      containers:
+      - name: hello-world 
+        imagePullPolicy: Always
+        image: nodejs-test:latest 
+        ports:
+        - containerPort: 3000
+       
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: hello-world 
+spec:
+  type: LoadBalancer
+  selector:
+    app: hello-world 
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+— 
+hpa:
+
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hello-world 
+spec:
+  maxReplicas: 10
+  minReplicas: 7
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hello-world 
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
+- type: Resource
+    resource:
+      name: memory
+      targetAverageUtilization: 60
